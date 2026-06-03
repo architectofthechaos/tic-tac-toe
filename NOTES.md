@@ -14,3 +14,10 @@ Phase 1: Tic-Tac-Toe app
 3. Interate through each task and implement it. For the sake of assignment - we will be grouping the tasks and implementing them in bulk with claude code. The implementation will follow TDD
 4. Generate ci to make sure it is green before further code pushes to github
 5. Generate a taskfile.yaml for local testing
+6. Test locally with taskfile before pushing to github. Helps clear issues before ci catches them 
+
+
+Things that are skipped intentionally: 
+1. multiple branches for each task and PRs
+2. running local taskfile to validate tests and checks after each task
+3. Push to git after each task

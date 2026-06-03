@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tic-Tac-Toe</title>
+    <style>
+      :root {
+        --line: #cbd5e1;
+        --ink: #1e293b;
+        --accent: #2563eb;
+        --bg: #f8fafc;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 1.25rem;
+        font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+      }
+      h1 { margin: 0; font-size: 1.6rem; }
+      #status { font-size: 1.1rem; min-height: 1.4rem; font-weight: 600; }
+      #board {
+        display: grid;
+        grid-template-columns: repeat(3, 84px);
+        grid-template-rows: repeat(3, 84px);
+        gap: 6px;
+      }
+      .cell {
+        font-size: 2.4rem;
+        font-weight: 700;
+        border: 2px solid var(--line);
+        border-radius: 10px;
+        background: white;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.1s ease;
+      }
+      .cell:hover:not(:disabled) { background: #eef2ff; }
+      .cell:disabled { cursor: default; }
+      .cell.x { color: var(--accent); }
+      .cell.o { color: #dc2626; }
+      button#new-game {
+        font-size: 1rem;
+        padding: 0.6rem 1.4rem;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        cursor: pointer;
+      }
+      button#new-game:hover { background: #1d4ed8; }
+    </style>
+  </head>
+  <body>
+    <h1>Tic-Tac-Toe</h1>
+    <div id="status">Loading…</div>
+    <div id="board"></div>
+    <button id="new-game">New Game</button>
+
+    <script>
+      const boardEl = document.getElementById("board");
+      const statusEl = document.getElementById("status");
+      const newGameBtn = document.getElementById("new-game");
+      let gameId = null;
+
+      function render(game) {
+        gameId = game.id;
+        boardEl.innerHTML = "";
+        const finished = game.status !== "in_progress";
+        game.board.forEach((row, r) => {
+          row.forEach((cell, c) => {
+            const btn = document.createElement("button");
+            btn.className = "cell" + (cell ? " " + cell.toLowerCase() : "");
+            btn.textContent = cell || "";
+            btn.disabled = finished || cell !== null;
+            btn.addEventListener("click", () => move(r, c));
+            boardEl.appendChild(btn);
+          });
+        });
+        if (game.status === "won") {
+          statusEl.textContent = `${game.winner} wins!`;
+        } else if (game.status === "draw") {
+          statusEl.textContent = "It's a draw.";
+        } else {
+          statusEl.textContent = `${game.current_player} to move`;
+        }
+      }
+
+      async function newGame() {
+        const resp = await fetch("/games", { method: "POST" });
+        render(await resp.json());
+      }
+
+      async function move(row, col) {
+        const resp = await fetch(`/games/${gameId}/moves`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ row, col }),
+        });
+        if (resp.ok) {
+          render(await resp.json());
+        } else {
+          // Rejected move (occupied / game over / invalid) — refresh from server.
+          const current = await fetch(`/games/${gameId}`);
+          render(await current.json());
+        }
+      }
+
+      newGameBtn.addEventListener("click", newGame);
+      newGame();
+    </script>
+  </body>
+</html>

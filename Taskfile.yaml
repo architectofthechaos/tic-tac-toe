@@ -1,0 +1,57 @@
+version: "3"
+
+# Local mirror of .github/workflows/ci.yaml so `task ci` reproduces CI.
+
+tasks:
+  default:
+    desc: List available tasks
+    cmds:
+      - task --list
+    silent: true
+
+  install:
+    desc: Install dependencies (mirrors CI "Install dependencies")
+    cmds:
+      - poetry install --no-interaction
+
+  # --- lint job (mirrors CI job: lint) ---
+  ruff-check:
+    desc: ruff check
+    cmds:
+      - poetry run ruff check .
+
+  ruff-format-check:
+    desc: ruff format --check
+    cmds:
+      - poetry run ruff format --check .
+
+  mypy:
+    desc: mypy
+    cmds:
+      - poetry run mypy app
+
+  lint:
+    desc: "CI lint job: ruff check, ruff format --check, mypy"
+    cmds:
+      - task: ruff-check
+      - task: ruff-format-check
+      - task: mypy
+
+  # --- test job (mirrors CI job: test) ---
+  test:
+    desc: "CI test job: pytest, tolerating exit code 5 (no tests collected)"
+    cmds:
+      - |
+        code=0
+        poetry run pytest || code=$?
+        if [ "$code" -eq 0 ] || [ "$code" -eq 5 ]; then
+          exit 0
+        fi
+        exit "$code"
+
+  # --- full pipeline (both CI jobs) ---
+  ci:
+    desc: Run the full CI pipeline locally (lint + test)
+    cmds:
+      - task: lint
+      - task: test
