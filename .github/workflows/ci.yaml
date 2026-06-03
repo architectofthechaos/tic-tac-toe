@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: ruff check
+        run: poetry run ruff check .
+      - name: ruff format --check
+        run: poetry run ruff format --check .
+      - name: mypy
+        run: poetry run mypy app
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install Poetry
+        run: pipx install poetry
+      - name: Install dependencies
+        run: poetry install --no-interaction
+      - name: pytest (tolerate exit code 5 = no tests collected)
+        run: |
+          code=0
+          poetry run pytest || code=$?
+          if [ "$code" -eq 0 ] || [ "$code" -eq 5 ]; then
+            exit 0
+          fi
+          exit "$code"

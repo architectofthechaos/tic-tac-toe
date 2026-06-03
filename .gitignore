@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+.python-version
+
+# Poetry (track poetry.lock; ignore local in-project venv if used)
+.venv/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test / coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Environment files
+.env
+.env.*
