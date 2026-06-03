@@ -8,3 +8,8 @@ Phase 0: Setup
 2. Create claude base repositories. 
 3. Initialize git in the project and push to the remote. 
 
+Phase 1: Tic-Tac-Toe app
+1. Generate spec for tic-tac-toe app
+2. Break the spec into executable tasks. 
+3. Interate through each task and implement it. For the sake of assignment - we will be grouping the tasks and implementing them in bulk with claude code. The implementation will follow TDD
+4. 
