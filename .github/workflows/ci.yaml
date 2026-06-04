@@ -45,3 +45,11 @@ jobs:
             exit 0
           fi
           exit "$code"
+
+  helm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: helm lint
+        run: helm lint helm/tic-tac-toe

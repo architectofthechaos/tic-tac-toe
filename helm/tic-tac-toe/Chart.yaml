@@ -1,0 +1,6 @@
+apiVersion: v2
+name: tic-tac-toe
+description: Helm chart for the tic-tac-toe FastAPI service
+type: application
+version: 0.1.0
+appVersion: "0.1.0"

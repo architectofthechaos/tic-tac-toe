@@ -49,9 +49,44 @@ tasks:
         fi
         exit "$code"
 
-  # --- full pipeline (both CI jobs) ---
+  # --- helm job (mirrors CI job: helm) ---
+  helm-lint:
+    desc: "CI helm job: lint the chart"
+    cmds:
+      - helm lint helm/tic-tac-toe
+
+  # --- docker / platform ---
+  docker-build:
+    desc: Build the local Docker image (tic-tac-toe:local)
+    cmds:
+      - docker build -t tic-tac-toe:local .
+
+  docker-smoke:
+    desc: Build the image, run it, curl /health, then stop and remove (cleanup via trap)
+    deps: [docker-build]
+    cmds:
+      - |
+        set -e
+        name=ttt-smoke
+        cleanup() { docker rm -f "$name" >/dev/null 2>&1 || true; }
+        trap cleanup EXIT
+        docker run -d --name "$name" -p 8001:8000 tic-tac-toe:local >/dev/null
+        for _ in $(seq 1 20); do
+          curl -sf http://127.0.0.1:8001/health >/dev/null 2>&1 && break
+          sleep 0.5
+        done
+        echo "health: $(curl -sf http://127.0.0.1:8001/health)"
+
+  platform-check:
+    desc: Smoke-test the container and lint the Helm chart (docker-smoke + helm lint)
+    cmds:
+      - task: docker-smoke
+      - task: helm-lint
+
+  # --- full pipeline (all CI jobs) ---
   ci:
-    desc: Run the full CI pipeline locally (lint + test)
+    desc: Run the full CI pipeline locally (lint + test + helm-lint)
     cmds:
       - task: lint
       - task: test
+      - task: helm-lint
